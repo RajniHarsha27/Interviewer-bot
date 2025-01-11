@@ -1,0 +1,39 @@
+body {
+  font-family: "Inter", sans-serif;
+  margin-top: 100px;
+  text-align: center;
+}
+
+#inputTextArea {
+  width: 100%;
+  resize: none;
+  border-radius: 5px;
+  height: 200px;
+  width: 500px;
+  border: none;
+  margin-right: 0px;
+  overflow-y: scroll;
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.125);
+}
+
+#inputArea {
+  background-color: rgb(214, 234, 244);
+  width: 580px;
+  padding: 20px;
+  display: flex;
+  margin: 0 auto;
+  border-radius: 5px;
+}
+
+.button {
+  height: 30px;
+  font-weight: bold;
+  border-radius: 5px;
+  border: none;
+  margin-bottom: 10px;
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.125);
+}
+
+#outputArea {
+  margin-bottom: 10px;
+}

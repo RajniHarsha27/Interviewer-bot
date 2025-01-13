@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Question Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        input, textarea, button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Interview Question Generator</h1>
+        <form id="questionForm">
+            <textarea id="jd" placeholder="Enter Job Description (JD)" required></textarea>
+            <textarea id="sampleQuestions" placeholder="Enter Sample Questions (Optional)"></textarea>
+            <input type="file" id="cv" accept=".txt,.pdf,.docx" required />
+            <button type="submit">Generate Questions</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById('questionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const jd = document.getElementById('jd').value;
+            const sampleQuestions = document.getElementById('sampleQuestions').value;
+            const cv = document.getElementById('cv').files[0];
+
+            if (!jd || !cv) {
+                alert("Please fill all required fields!");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("jd_text", jd);
+            formData.append("sample_questions", sampleQuestions);
+            formData.append("cv_file", cv);
+
+            try {
+                const response = await fetch("http://localhost:8000/generate-questions", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    // Save questions in local storage
+                    localStorage.setItem("generatedQuestions", JSON.stringify(data.questions));
+                    // Redirect to mm.html
+                    window.location.href = "index.html";
+                }
+            } catch (error) {
+                console.error("Error generating questions:", error);
+            }
+        });
+    </script>
+</body>
+</html>

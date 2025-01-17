@@ -17,6 +17,8 @@ questions = ['Your CV highlights experience with various LLMs and NLP tasks. Can
 
 app = FastAPI()
 
+global current_index
+current_index = 0
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -43,6 +45,8 @@ async def name(request: Request):
 @app.post("/webhook")
 async def handle_webhook(request: Request):
 
+    global current_index
+
     body = await request.json()
     pretty_body = json.dumps(body, indent=4)
 
@@ -52,7 +56,33 @@ async def handle_webhook(request: Request):
     current_page = page_info.get('displayName', "")
 
     if current_page == 'Entry Page' and current_intent == "":
-        text = "This is the return text from webhook server."
+        current_index = -1
+        text = "Can you tell me about yourself?"
+        current_index += 1
         response = format_response(text)
+
+    elif current_page == "Entry Page" and current_intent == "answer":
+        text = questions[current_index]
+        current_index += 1
+        response = format_response(text)
+
+    elif current_page == "Entry Page" and current_intent == "repeat":
+        if current_index == 0:
+            text = "Can you tell me about yourself?"
+        else:
+            text = questions[current_index-1]
+            
+        response = format_response(text)
+
+    elif current_page == "Entry Page" and current_intent == "skip":
+        text = questions[current_index]
+        current_index += 1
+        response = format_response(text)
+
+    elif current_page == "Entry Page" and current_intent == "exit":
+        text = "Thank you for your time. Goodbye!"
+        response = format_response(text)
+
+    
 
     return JSONResponse(content=response, status_code=200)

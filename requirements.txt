@@ -1,0 +1,13 @@
+fastapi
+python-multipart
+pydantic
+uvicorn
+google-generativeai
+python-docx
+pypdf2
+motor
+google-cloud-speech
+google-cloud-texttospeech
+pybase64
+.
+

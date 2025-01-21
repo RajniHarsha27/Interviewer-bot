@@ -8,6 +8,7 @@ pypdf2
 motor
 google-cloud-speech
 google-cloud-texttospeech
+pyaudio
 pybase64
 .
 

@@ -1,3 +1,7 @@
 hubnex.egg-info
 build
 .env
+sa_speech2text.json
+harvard.wav
+mono_audio.wav
+mono.py

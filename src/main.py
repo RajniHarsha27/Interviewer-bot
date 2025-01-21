@@ -6,8 +6,8 @@ import os
 import google.generativeai as genai
 from docx import Document
 import PyPDF2 as pdf
-from db import db
-from models import QuestionSchema
+from src.db import db
+from src.models import QuestionSchema
 
 # Initialize FastAPI
 app = FastAPI()

@@ -27,6 +27,10 @@ def text_to_speech(text):
     return base64.b64encode(response.audio_content).decode('utf-8')
 
 
+
+    
+
+
     
 
     

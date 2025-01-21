@@ -1,34 +1,29 @@
+import io
+from google.oauth2 import service_account
 from google.cloud import speech
 
-import base64
+client_file = 'sa_speech2text.json'
+credentials = service_account.Credentials.from_service_account_file(client_file)
+client = speech.SpeechClient(credentials=credentials)
 
 
-speech_client = speech.SpeechClient()
+audio_file  = 'mono_audio.wav'
 
 
-def speech_to_text(audio_base64):
-
-    # decode the base64 audio
-    audio_bytes = base64.b64decode(audio_base64)
-
-    audio = speech.RecognitionAudio(content=audio_bytes)
-
-    # configuration
-    config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        sample_rate_hertz = 16000,
-        language_code= 'en-US'
-    )
-
-    # peforming speech recognition
-    response = speech_client.recognize(config=config, audio=audio)
-
-    # CHECK response is not empty
-    if response.results:
-        return response.results[0].alternatives[0].transcript
-    
-
-    return None
+with io.open(audio_file, 'rb') as f:
+    content = f.read()
+    audio = speech.RecognitionAudio(content=content)
 
 
 
+config = speech.RecognitionConfig(
+    encoding = speech.RecognitionConfig.AudioEncoding.LINEAR16,
+    sample_rate_hertz = 44100,
+    language_code="en-US"
+)
+
+
+response = client.recognize(config=config, audio=audio)
+
+alternatives = [alternative.transcript for result in response.results for alternative in result.alternatives]
+print(" ".join(alternatives))

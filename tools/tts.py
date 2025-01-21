@@ -1,38 +1,55 @@
 from google.cloud import texttospeech
-import typing
-import base64
+import os
+import pyaudio 
+import time
 
-tts_client = texttospeech.TextToSpeechClient()
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'sa_text2speech.json'
 
-# Converts to speehc and return Base64-encoded
-def text_to_speech(text):
-    
-    wave = texttospeech.SynthesisInput(text=text)
+client = texttospeech.TextToSpeechClient()
 
-    # selecting voice
-    voice = texttospeech.VoiceSelectionParams(
-        language_code='en-US', ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
-    )
-    
-    # configuration
-    audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEnconding.MP3)
+text_block = 'hello i am hubnex. How can I assist you?'
 
-    # generate speech
-    response = tts_client.synthesize_speech(
-        input=wave, voice=voice, audio_config=audio_config
-    )
+synthesis_input = texttospeech.SynthesisInput(text=text_block)
 
-    # convert to base64 encoder
+voice = texttospeech.VoiceSelectionParams(
+    language_code='en-US',
+    name='en-US-Studio-O'
+)
 
-    return base64.b64encode(response.audio_content).decode('utf-8')
+audio_config = texttospeech.AudioConfig(
+    audio_encoding=texttospeech.AudioEncoding.LINEAR16,  # Use LINEAR16 for streaming
+    speaking_rate=1,
+    pitch=1
+)
 
 
 
-    
+# response = client.synthesize_speech(
+#     input = synthesis_input,
+#     voice = voice,
+#     audio_config = audio_config
+# )
 
+# with open('output.mp3', 'wb') as output:
+#     output.write(response.audio_content)
+#     print('Audio content written tot file "output.mp3"')
 
-    
+# Streaming setup
+p = pyaudio.PyAudio()
+stream = p.open(rate=24000, channels=1, format=pyaudio.paInt16, output=True)
 
-    
+def play_audio(response):
+    stream.write(response.audio_content)
 
+sentences = text_block.split('.')
 
+for sentence in sentences:
+    synthesis_input.text = sentence.strip() + '.'
+    response = client.synthesize_speech(input=synthesis_input, voice=voice, audio_config=audio_config)
+    play_audio(response)
+    time.sleep(0.5)  
+    print(f"Played sentence: {sentence.strip()}")
+
+stream.stop_stream()
+stream.close()
+p.terminate()

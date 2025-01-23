@@ -127,25 +127,15 @@ def get_transcript(audio_content: bytes):
     # Return the transcriptions from the response
     return response.results
 
-@app.post("/transcribe")
-async def transcribe_audio(audio: UploadFile = File(...)):
-    # Read the audio file directly from the uploaded file without saving
-    audio_content = await audio.read()
-    print(audio_content)
-
-    # Get the transcript using the Google Cloud Speech-to-Text API
-    results = get_transcript(audio_content)
-
-    # Extract the transcription from the results
-    transcript = " ".join([result.alternatives[0].transcript for result in results])
-
-    # Return the transcript as a response
-    response = {
-        "transcript": transcript,
-        "audio_url" : "/audio"
-    }
-
-    return JSONResponse(content=response, status_code=200)
+import time
+def generate_audio() -> bytes:
+    time.sleep(5)
+    with open("sample.mp3", "rb") as answer_file:
+        return answer_file.read()
+    
+def generate_df_answer() -> str:
+    time.sleep(2)
+    return "sample answer"
 
 @app.websocket("/ws/audio")
 async def websocket_audio(websocket: WebSocket):
@@ -154,14 +144,17 @@ async def websocket_audio(websocket: WebSocket):
         while True:
             # Receive audio data as binary (audio file sent in chunks)
             audio_data = await websocket.receive_bytes()
-
             results = get_transcript(audio_data)
-
             transcript = " ".join([result.alternatives[0].transcript for result in results])
-
-
+             
             # Send the transcript back to the client
             await websocket.send_json({"transcript": transcript})
+            
+            answer = generate_df_answer()
+            await websocket.send_json({"answer" : answer})
+
+            answer_audio = generate_audio()
+            await websocket.send_bytes(answer_audio)
 
     except WebSocketDisconnect:
         print("Client disconnected.")

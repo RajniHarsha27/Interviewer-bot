@@ -63,3 +63,16 @@ body {
   text-align: left; /* Align messages to the right */
   word-wrap: break-word; /* Ensure long words are wrapped to next line */
 }
+
+.chat-answer {
+  background-color: rgb(235, 231, 231); /* Green background for the messages */
+  color: rgb(0, 0, 0); /* White text color */
+  border-radius: 5px; /* Rounded corners */
+  font-size: 10px;
+  padding: 5px;
+  margin-left: 15px;
+  margin-bottom: 5px;
+  max-width: 80%; /* Limit width of message */
+  text-align: left; /* Align messages to the right */
+  word-wrap: break-word; /* Ensure long words are wrapped to next line */
+}

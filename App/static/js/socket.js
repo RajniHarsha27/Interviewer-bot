@@ -12,9 +12,22 @@ socket.onopen = () => {
 };
 
 socket.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  if (data.transcript) {
-    putResponse(data.transcript); // Display the transcript from the server
+  if (typeof event.data === "string") {
+    const data = JSON.parse(event.data);
+    if (data.transcript) {
+      putResponse(data.transcript);
+    } else if (data.answer) {
+      putAnswer(data.answer);
+    }
+  } else {
+    let audioBlob = new Blob([event.data], { type: "audio/mpeg" });
+    let audioUrl = URL.createObjectURL(audioBlob);
+    let audioPlayer = document.createElement("audio");
+    audioPlayer = document.createElement("audio");
+    audioPlayer.id = "audio-player";
+    historyArea.appendChild(audioPlayer);
+    audioPlayer.src = audioUrl;
+    audioPlayer.play();
   }
 };
 
@@ -25,6 +38,20 @@ function putResponse(responseText) {
 
   const messageContent = document.createElement("p");
   messageContent.textContent = responseText;
+
+  messageDiv.appendChild(messageContent);
+
+  const historyArea = document.getElementById("historyArea");
+  historyArea.appendChild(messageDiv);
+  historyArea.scrollTop = historyArea.scrollHeight;
+}
+
+function putAnswer(answerText) {
+  const messageDiv = document.createElement("div");
+  messageDiv.classList.add("chat-answer");
+
+  const messageContent = document.createElement("p");
+  messageContent.textContent = answerText;
 
   messageDiv.appendChild(messageContent);
 

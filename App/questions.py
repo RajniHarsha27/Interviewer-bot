@@ -200,3 +200,5 @@ array = []
 
 for i in result.response:
     array.append(i.question)
+
+array

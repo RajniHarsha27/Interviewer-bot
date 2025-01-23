@@ -10,3 +10,10 @@ websocket-client
 langchain
 langchain_core
 langchain_google_genai
+google-cloud
+google-cloud-dialogflow-cx
+google-cloud-speech
+pyaudio
+pydub
+ffmpeg
+python-multipart

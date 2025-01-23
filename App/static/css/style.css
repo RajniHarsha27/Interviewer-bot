@@ -1,51 +1,65 @@
 body {
-  font-family: "Inter", sans-serif;
-  margin-top: 100px;
+  display: flex;
+  font-family: sans-serif, "Inter";
+  justify-content: center;
+  height: 100vh;
+  align-items: center;
+  margin: 0;
+}
+
+#mainConsole {
+  background-color: rgb(0, 0, 0);
+  justify-content: center;
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.125);
+  height: 500px;
+  width: 400px;
+  border-radius: 10px;
   text-align: center;
 }
 
-#inputTextArea {
-  width: 100%;
-  resize: none;
+.title {
+  background-color: rgb(0, 0, 0);
+  padding-top: 20px;
+  color: rgb(255, 255, 255);
+  font-size: 15px;
+  height: 23px;
+  margin-top: 0px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+#historyArea {
+  margin-left: 12px;
+  margin-right: 12px;
+  margin-bottom: 10px;
+  padding-top: 5px;
+  margin-top: 10px;
+  background-color: rgb(255, 255, 255);
   border-radius: 5px;
-  height: 100px;
-  width: 500px;
-  border: none;
-  margin-right: 0px;
+  width: auto;
+  height: 400px;
   overflow-y: scroll;
-  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.125);
 }
 
-#inputArea {
-  background-color: rgb(239, 238, 238);
-  width: 580px;
-  padding: 20px;
-  padding-right: 0px !important;
-  display: flex;
-  margin: 0 auto;
-  border-radius: 5px;
-  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.125);
-}
-
-.button {
-  height: 30px;
+#record {
+  background-color: white;
+  border-radius: 2px;
+  color: rgb(0, 0, 0);
   font-weight: bold;
-  border-radius: 5px;
-  width: 80px;
   border: none;
-  margin-bottom: 10px;
-  background-color: rgb(7, 165, 120);
-  color: white;
-  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.247);
+  height: 22px;
+  width: 70px;
 }
 
-#outputArea {
-  margin-bottom: 10px;
-  height: 150px;
-  font-size: small;
-}
-
-#mainArea {
-  background-color: rgb(255, 255, 255) !important;
-  height: 500px;
+.chat-message {
+  background-color: rgb(0, 0, 0); /* Green background for the messages */
+  color: rgb(255, 255, 255); /* White text color */
+  border-radius: 5px; /* Rounded corners */
+  font-size: 10px;
+  padding: 5px;
+  margin-left: 45px;
+  margin-bottom: 5px;
+  max-width: 80%; /* Limit width of message */
+  text-align: left; /* Align messages to the right */
+  word-wrap: break-word; /* Ensure long words are wrapped to next line */
 }

@@ -7,6 +7,7 @@ from google.cloud import dialogflowcx_v3 as dialogflow
 import os
 from dotenv import load_dotenv
 from google.cloud import speech
+from google.cloud import texttospeech
 from typing import AsyncGenerator
 import asyncio
 import io
@@ -128,14 +129,42 @@ def get_transcript(audio_content: bytes):
     return response.results
 
 import time
-def generate_audio() -> bytes:
-    time.sleep(5)
-    with open("sample.mp3", "rb") as answer_file:
-        return answer_file.read()
+def generate_audio(answer) -> bytes:
+    """Synthesizes speech from the input string of ssml.
+
+    Note: ssml must be well-formed according to:
+        https://www.w3.org/TR/speech-synthesis/
+
+    """
+
+    ssml = f"<speak>{answer}</speak>"
+    client = texttospeech.TextToSpeechClient()
+
+    input_text = texttospeech.SynthesisInput(ssml=ssml)
+
+    # Note: the voice can also be specified by name.
+    # Names of voices can be retrieved with client.list_voices().
+    voice = texttospeech.VoiceSelectionParams(
+        language_code="en-US",
+        name="en-US-Polyglot-1",
+        ssml_gender=texttospeech.SsmlVoiceGender.MALE,
+    )
+
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3
+    )
+
+    response = client.synthesize_speech(
+        input=input_text, voice=voice, audio_config=audio_config
+    )
+
+    # The response's audio_content is binary.
+    return response.audio_content
+
     
-def generate_df_answer() -> str:
+def generate_df_answer(transcript) -> str:
     time.sleep(2)
-    return "sample answer"
+    return transcript
 
 @app.websocket("/ws/audio")
 async def websocket_audio(websocket: WebSocket):
@@ -150,11 +179,11 @@ async def websocket_audio(websocket: WebSocket):
             # Send the transcript back to the client
             await websocket.send_json({"transcript": transcript})
             
-            answer = generate_df_answer()
-            await websocket.send_json({"answer" : answer})
+            answer = generate_df_answer(transcript)
+            answer_audio = generate_audio(answer)
 
-            answer_audio = generate_audio()
             await websocket.send_bytes(answer_audio)
+            await websocket.send_json({"answer" : answer})
 
     except WebSocketDisconnect:
         print("Client disconnected.")

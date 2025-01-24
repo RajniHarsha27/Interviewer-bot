@@ -1,5 +1,4 @@
 import argparse
-import uuid
 from google.cloud.dialogflowcx_v3beta1.services.agents import AgentsClient
 from google.cloud.dialogflowcx_v3beta1.services.sessions import SessionsClient
 from google.cloud.dialogflowcx_v3beta1.types import session
@@ -25,7 +24,9 @@ def run_sample(text, id):
     # For more supported languages see https://cloud.google.com/dialogflow/es/docs/reference/language
     language_code = "en-us"
 
-    detect_intent_texts(agent, session_id, texts, language_code)
+    value = detect_intent_texts(agent, session_id, texts, language_code)
+
+    return value
 
 
 def detect_intent_texts(agent, session_id, texts, language_code):
@@ -52,18 +53,14 @@ def detect_intent_texts(agent, session_id, texts, language_code):
         )
         response = session_client.detect_intent(request=request)
 
-        print("=" * 20)
         #print(f"Query text: {response.query_result.text}")
         response_messages = [
-            " ".join(msg.text.text) for msg in response.query_result.response_messages
+            "\n".join(msg.text.text) for msg in response.query_result.response_messages
         ]
-        print(f"Response text: {' '.join(response_messages)}\n")
+        print(response.query_result)
+        return_value = ' '.join(response_messages)
+        return_value = str(return_value) + str("\n")
 
-id = uuid.uuid4()
+        return return_value
 
-while True:
-    text = input("user : ")
-    if text.lower() == "exit":
-        break
-    else:
-        run_sample(text, id)
+

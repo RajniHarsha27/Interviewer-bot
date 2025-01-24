@@ -69,5 +69,5 @@ def synthesize_and_play_audio(client_file: str, text: str, language_code: str = 
 # Example usage
 if __name__ == "__main__":
     client_file = 'sa_text2speech.json'
-    text_block = 'Hello, I am Hubnex. How can I assist you?'
+    text_block = 'Your CV highlights experience with various LLMs and NLP tasks. Can you describe a project where you had to fine-tune a large language model for a specific application, detailing the challenges you faced and how you overcame them?'
     synthesize_and_play_audio(client_file, text_block)

@@ -3,6 +3,7 @@ build
 .env
 sa_speech2text.json
 sa_text2speech.json
+sa_cloud_storage.json
 harvard.wav
 mono_audio.wav
 mono.py

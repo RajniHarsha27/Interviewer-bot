@@ -21,7 +21,7 @@ app.add_middleware(
 )
 
 # Initialize Google Generative AI
-genai.configure(api_key="AIzaSyC1fxVBeFsISBwuvQXMN4ZjcW7UDKKNK1M")
+genai.configure(api_key="")
 
 # Utility functions for file content extraction
 def input_pdf_text(uploaded_file):

@@ -1,7 +1,35 @@
 const recordButton = document.getElementById("record");
+let statusBar = document.getElementById("statusBar");
+const maxRecordingTime = 29000;
+let seconds = 29;
+let funcId = null;
 
 let mediaRecorder;
 let isRecording = false;
+
+function formatTime(seconds) {
+  const minute = Math.floor(seconds / 60);
+  const second = seconds % 60;
+  formatted_minute = minute.toString().padStart(2, "0");
+  formatted_seconds = second.toString().padStart(2, "0");
+  recordButton.innerHTML = `${formatted_minute}:${formatted_seconds}`;
+}
+function updateTime() {
+  seconds--;
+  formatTime(seconds);
+}
+
+function stopTimer() {
+  clearInterval(funcId);
+  seconds = 29;
+  funcId = null;
+}
+
+function startTimer() {
+  if (funcId == null) {
+    funcId = setInterval(updateTime, 1000);
+  }
+}
 
 // WebSocket setup:
 const socket = new WebSocket("ws://localhost:8000/ws/audio"); // Replace with your WebSocket endpoint
@@ -15,6 +43,7 @@ socket.onmessage = (event) => {
   if (typeof event.data === "string") {
     const data = JSON.parse(event.data);
     if (data.transcript) {
+      statusBar.innerHTML = "<br>";
       putResponse(data.transcript);
     } else if (data.answer) {
       putAnswer(data.answer);
@@ -28,6 +57,10 @@ socket.onmessage = (event) => {
     historyArea.appendChild(audioPlayer);
     audioPlayer.src = audioUrl;
     audioPlayer.play();
+    statusBar.textContent = "Bot speaking...";
+    audioPlayer.addEventListener("ended", () => {
+      statusBar.innerHTML = "<br>";
+    });
   }
 };
 
@@ -65,35 +98,68 @@ function setupSuccess(stream) {
   console.log("Setup Success");
   mediaRecorder = new MediaRecorder(stream);
 
-  function handleStop(event) {
+  function handleStop() {
     const blob = new Blob(chunks, { type: "audio/mpeg" });
     chunks = [];
+    statusBar.textContent = "Transcribing your answer...";
 
     // Send audio data via WebSocket
     if (socket.readyState === WebSocket.OPEN) {
-      socket.send(blob); // Send audio file as binary data over WebSocket
+      socket.send(blob);
+    }
+
+    // Reset UI after stopping
+    stopTimer();
+    recordButton.innerText = "Record";
+    recordButton.disabled = false; // Enable button again
+  }
+
+  function handleClick(e) {
+    e.preventDefault();
+
+    if (mediaRecorder.state === "inactive") {
+      // Start recording
+      chunks = [];
+      mediaRecorder.start();
+      startTimer();
+      recordButton.innerText = "00:29";
+      statusBar.textContent = "Recording your answer...";
+      recordButton.disabled = true; // Disable button to prevent multiple clicks
+
+      stopButton = document.createElement("button");
+      stopButton.id = "stop";
+      stopButton.classList.add("button");
+      stopButton.innerHTML = "Stop";
+      const buttonContainer = document.getElementById("buttons");
+      buttonContainer.appendChild(stopButton); // Append to body or preferred container
+      stopButton.addEventListener("click", handleStopRecordingManually);
+
+      // Auto-stop recording after 29 seconds
+      setTimeout(() => {
+        if (mediaRecorder.state === "recording") {
+          mediaRecorder.stop();
+          stopButton.remove();
+        }
+      }, maxRecordingTime);
     }
   }
 
-  let chunks = [];
-  function handleClick(e) {
+  function handleStopRecordingManually(e) {
     e.preventDefault();
     if (mediaRecorder.state === "recording") {
       mediaRecorder.stop();
+      stopTimer();
       recordButton.innerText = "Record";
-    } else {
-      mediaRecorder.start();
-      recordButton.innerText = "Stop";
+      recordButton.disabled = false; // Enable record button again
+      statusBar.textContent = "Recording stopped manually.";
+      stopButton.remove(); // Remove stop button after stopping recording manually
     }
-
-    mediaRecorder.ondataavailable = (event) => {
-      chunks.push(event.data);
-    };
-
-    mediaRecorder.onstop = (event) => handleStop(event);
   }
 
-  recordButton.addEventListener("click", (e) => handleClick(e));
+  mediaRecorder.ondataavailable = (event) => chunks.push(event.data);
+  mediaRecorder.onstop = handleStop;
+
+  recordButton.addEventListener("click", handleClick);
 }
 
 // Handle failure to get the media stream

@@ -11,7 +11,7 @@ body {
   background-color: rgb(0, 0, 0);
   justify-content: center;
   box-shadow: 0 3px 3px rgba(0, 0, 0, 0.125);
-  height: 500px;
+  height: 520px;
   width: 400px;
   border-radius: 10px;
   text-align: center;
@@ -41,10 +41,12 @@ body {
   overflow-y: scroll;
 }
 
-#record {
+.button {
+  margin-top: 5px;
   background-color: white;
   border-radius: 2px;
   color: rgb(0, 0, 0);
+  margin-right: 5px;
   font-weight: bold;
   border: none;
   height: 22px;
@@ -75,4 +77,23 @@ body {
   max-width: 80%; /* Limit width of message */
   text-align: left; /* Align messages to the right */
   word-wrap: break-word; /* Ensure long words are wrapped to next line */
+}
+
+#statusBar {
+  background-color: rgb(0, 0, 0);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 0px;
+  margin: 0px;
+}
+
+#buttons {
+  display: flex;
+  justify-content: center;
+}
+
+#stop {
+  background-color: rgb(231, 65, 65) !important;
+  color: white !important;
 }

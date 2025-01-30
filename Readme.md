@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 ### Installing Ngrok
 
-1. Visit the following link to download ngrok for Windows: [https://dashboard.ngrok.com/get-started/setup/windows](ngrok Windows Setup)
+1. Visit the following link to download ngrok for Windows: [https://dashboard.ngrok.com/get-started/setup/windows] (ngrok Windows Setup)
 
    _For Mac OS, refer the same link and navigate accordingly._
 

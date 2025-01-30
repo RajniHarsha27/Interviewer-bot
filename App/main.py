@@ -26,9 +26,26 @@ id_ = None
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.get('/')
-async def name(request: Request):
-    return templates.TemplateResponse('home.html', {'request': request, "var" : "variable"})
+@app.get("/")
+async def home(request: Request):
+    return templates.TemplateResponse('home.html', {'request': request})
+
+@app.post('/validate-email')
+async def validate_email(request: Request):
+    form_data = await request.json() 
+    email = form_data.get('email')
+    print("Email : " ,email)
+    #if email is present in db then valid, valid format eg: @gmail.com 
+    if(True): #condition to check valididty
+        validity = "true"
+        # POST requests to webhooks with fetched questions, 
+        # POST request /interview route to initiate interview.
+        
+    return {"valid": validity}
+
+@app.get('/interview')
+async def interview(request: Request):
+    return templates.TemplateResponse('interview.html', {'request': request, "var" : "variable"})
 
 
 client = speech.SpeechClient()
@@ -118,7 +135,8 @@ async def websocket_audio(websocket: WebSocket):
             # Send the transcript back to the client
             await websocket.send_json({"transcript": transcript})
             
-            answer = generate_df_answer(transcript)
+            answer = generate_df_answer(transcript) # fetches question from df webhook server
+            #
             answer_audio = generate_audio(answer)
 
             await websocket.send_bytes(answer_audio)

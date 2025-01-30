@@ -31,6 +31,27 @@ def format_response(text):
 
     return response
 
+def format_response_v2(text):
+    response = {
+            "fulfillmentResponse": {
+                "messages": [
+                    {
+                        "text": {
+                            "text": [text]
+                        }
+                    }
+                ]
+            },
+            "sessionInfo": {
+                "parameters": 
+                    {
+                        "question": text,
+                    }
+             }
+    }
+
+    return response
+
 @app.get("/")
 async def home(request:Request):
     return "ok"
@@ -53,12 +74,14 @@ async def handle_webhook(request: Request):
         current_index = -1
         text = "Can you tell me about yourself?"
         current_index += 1
-        response = format_response(text)
+        #response = format_response(text)
+        response = format_response_v2(text)
 
     elif current_page == "Entry Page" and current_intent == "answer":
         text = questions[current_index]
         current_index += 1
-        response = format_response(text)
+        #response = format_response(text)
+        response = format_response_v2(text)
 
     elif current_page == "Entry Page" and current_intent == "repeat":
         if current_index == 0:
@@ -66,16 +89,19 @@ async def handle_webhook(request: Request):
         else:
             text = questions[current_index-1]
             
-        response = format_response(text)
+        #response = format_response(text)
+        response = format_response_v2(text)
 
     elif current_page == "Entry Page" and current_intent == "skip":
         text = questions[current_index]
         current_index += 1
-        response = format_response(text)
+        #response = format_response(text)
+        response = format_response_v2(text)
 
     elif current_page == "Entry Page" and current_intent == "exit":
         text = "Thank you for your time. Goodbye!"
-        response = format_response(text)
+        #response = format_response(text)
+        response = format_response_v2(text)
 
     
 

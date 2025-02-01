@@ -2,6 +2,15 @@
 from fastapi import FastAPI, Request, File, WebSocket, WebSocketDisconnect, UploadFile
 import json
 from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse
+from models import Question
+from db import get_questions_by_email
+from pydantic import BaseModel, EmailStr
+
+email=None
+class EmailRequest(BaseModel):
+    email: str
+    
 
 questions = ['Your CV highlights experience with various LLMs and NLP tasks. Can you describe a project where you had to fine-tune a large language model for a specific application, detailing the challenges you faced and how you overcame them?',
  'The job description emphasizes experience with RAG (Retrieval-Augmented Generation).  Describe your experience building and deploying RAG systems. What were some key design decisions you made, and what were the performance implications of those choices?',
@@ -34,6 +43,22 @@ def format_response(text):
 @app.get("/")
 async def home(request:Request):
     return "ok"
+
+@app.post("/post_email")
+async def post_email(data: EmailRequest):
+    """Receives email and session ID from interview API."""
+    global email
+    email = data.email    
+    print(f"Email received: {email}")
+    # You can store the data in a database or process it
+    return {"message": "Data received successfully"}
+
+questions = get_questions_by_email(email)
+
+
+
+
+
 @app.post("/webhook")
 async def handle_webhook(request: Request):
 

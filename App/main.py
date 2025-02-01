@@ -14,6 +14,11 @@ import io
 from fastapi.middleware.cors import CORSMiddleware
 import uuid
 from get_df_response import run_sample
+from db import store_chat
+from models import ChatSession
+from pydantic import BaseModel, EmailStr
+from db import check_email_exists  # Function to check if email exists in MongoDB
+import requests
 
 env_path = "C:\Hubnex\Interviewer Assistant\.env"
 load_dotenv(dotenv_path=env_path)
@@ -22,24 +27,35 @@ app = FastAPI()
 print("Loaded credentials path:", os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
 
 id_ = None
+email=None
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.get("/")
 async def home(request: Request):
     return templates.TemplateResponse('home.html', {'request': request})
 
-@app.post('/validate-email')
-async def validate_email(request: Request):
-    form_data = await request.json() 
-    email = form_data.get('email')
-    print("Email : " ,email)
-    if(True):
-        validity = "true"
-    else:
-        validity = "false"
-    return {"valid": validity}
+class EmailValidationRequest(BaseModel):
+    email: EmailStr  # Ensures valid email format
+
+@app.post("/validate-email")
+async def validate_email(request: EmailValidationRequest):
+    """Validates if the email exists in the database."""
+    exists = check_email_exists(request.email)
+    global email
+    if exists:
+        print("Email exists in the database.")
+        email = request.email
+
+        return {"valid": True}
+    return {"valid": False}
 
 @app.post('/interview')
 async def interview(request: Request):
@@ -119,7 +135,11 @@ async def websocket_audio(websocket: WebSocket):
         id_ = str(uuid.uuid4())
 
     initial_response = run_sample("hi", id_)
+    store_chat(id_ , None, initial_response)
     answer_audio = generate_audio(initial_response)
+    external_api_url = "http://127.0.0.1:8001/post_email"
+    response = requests.post(external_api_url, json={"email": email})
+
     await websocket.send_json({"answer" : initial_response})
     await websocket.send_bytes(answer_audio)
     
@@ -136,6 +156,7 @@ async def websocket_audio(websocket: WebSocket):
             answer = generate_df_answer(transcript) # fetches question from df webhook server
             #
             answer_audio = generate_audio(answer)
+            store_chat(id_,email, transcript, answer)
 
             await websocket.send_bytes(answer_audio)
             await websocket.send_json({"answer" : answer})

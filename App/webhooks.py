@@ -2,6 +2,7 @@
 from fastapi import FastAPI, Request, File, WebSocket, WebSocketDisconnect, UploadFile
 import json
 from fastapi.responses import JSONResponse
+from classifier import classify
 
 questions = ['Your CV highlights experience with various LLMs and NLP tasks. Can you describe a project where you had to fine-tune a large language model for a specific application, detailing the challenges you faced and how you overcame them?',
  'The job description emphasizes experience with RAG (Retrieval-Augmented Generation).  Describe your experience building and deploying RAG systems. What were some key design decisions you made, and what were the performance implications of those choices?',
@@ -14,8 +15,12 @@ questions = ['Your CV highlights experience with various LLMs and NLP tasks. Can
  'Our AI tutors need to be emotionally intuitive. How would you approach designing and implementing this aspect of the AI, considering the limitations and ethical considerations of current LLM technology?',
  'The job description mentions staying updated with the latest advancements in LLM technologies.  What are some recent advancements in LLMs that you find particularly exciting, and how do you keep yourself informed about these developments?']
 
+
+questions = questions[:5]
+
 app = FastAPI()
-current_index = 0
+current_index = -1
+intent = ""
 def format_response(text):
     response = {
             "fulfillmentResponse": {
@@ -31,7 +36,7 @@ def format_response(text):
 
     return response
 
-def format_response_v2(text):
+def format_response_v2(text, intent):
     response = {
             "fulfillmentResponse": {
                 "messages": [
@@ -46,6 +51,7 @@ def format_response_v2(text):
                 "parameters": 
                     {
                         "question": text,
+                        "intent": intent
                     }
              }
     }
@@ -58,51 +64,65 @@ async def home(request:Request):
 @app.post("/webhook")
 async def handle_webhook(request: Request):
 
-    global current_index
-
-   
+    global current_index, intent
 
     body = await request.json()
     pretty_body = json.dumps(body, indent=4)
-
+    #print(pretty_body)
     page_info = body.get("pageInfo", {})
     session_info = body.get("sessionInfo", {})
-    current_intent = session_info.get("parameters",{}).get("$request.generative.subIntent", "")
+    current_intent = session_info.get("intentInfo",{}).get("displayName", "")
     current_page = page_info.get('displayName', "")
+    user_input = body.get("text", "")
+    print("current_intent :", current_intent)
+    print("user input : ", user_input)
 
-    if current_page == 'Entry Page' and current_intent == "":
+    if current_page == 'Intent Classifier' and current_intent!= "confirmation.intent":
+        text =""
+        if(current_index > -1):
+            intent = classify(user_input)
+            print("intent : ", intent)
+        response = format_response_v2(text, intent = intent)
+
+    if current_page == 'Entry Page' and intent == "":
         current_index = -1
         text = "Can you tell me about yourself?"
         current_index += 1
         #response = format_response(text)
-        response = format_response_v2(text)
+        response = format_response_v2(text, intent = intent)
 
-    elif current_page == "Entry Page" and current_intent == "answer":
+    elif current_index == len(questions)-1:
+        text = "Thank you for joining. Your responses are recorded. Please click the submit button to confirm that you want to exit the interview."
+        response = format_response_v2(text, intent= "exit")
+
+    elif current_page == "Entry Page" and intent == "answer":
         text = questions[current_index]
         current_index += 1
         #response = format_response(text)
-        response = format_response_v2(text)
+        response = format_response_v2(text, intent)
 
-    elif current_page == "Entry Page" and current_intent == "repeat":
+    elif current_page == "Entry Page" and intent == "repeat":
         if current_index == 0:
             text = "Can you tell me about yourself?"
         else:
             text = questions[current_index-1]
             
         #response = format_response(text)
-        response = format_response_v2(text)
+        response = format_response_v2(text, intent)
 
-    elif current_page == "Entry Page" and current_intent == "skip":
+    elif current_page == "Entry Page" and intent == "skip":
         text = questions[current_index]
         current_index += 1
         #response = format_response(text)
-        response = format_response_v2(text)
+        response = format_response_v2(text,intent)
 
-    elif current_page == "Entry Page" and current_intent == "exit":
+    elif current_page == "Entry Page" and intent == "exit":
         text = "Thank you for your time. Goodbye!"
         #response = format_response(text)
-        response = format_response_v2(text)
+        response = format_response_v2(text, intent)
 
     
 
     return JSONResponse(content=response, status_code=200)
+
+

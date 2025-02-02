@@ -1,0 +1,91 @@
+body {
+  background-color: rgb(255, 255, 255);
+  font-family: "Inter", sans-serif;
+  align-items: center;
+  display: flex;
+  font-weight: bold;
+  justify-content: center;
+}
+
+.container {
+  padding: 10px;
+  margin-top: 30px;
+  justify-content: center;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  width: 600px;
+  justify-items: center;
+  height: 470px;
+  background-color: rgb(235, 231, 231);
+}
+
+.inputArea {
+  font-size: 12px;
+  font-weight: bold;
+  font-family: sans-serif, "Inter";
+  display: block;
+  width: 500px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 5px;
+  overflow-y: scroll;
+  resize: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+#jd {
+  height: 150px;
+}
+
+#sampleQuestions {
+  height: 70px;
+}
+
+#cvInput {
+  margin-bottom: 5px;
+  width: 500px;
+  text-align: left;
+}
+
+#textInputs {
+  width: 520px;
+  justify-items: center;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.textField {
+  margin-top: 3px;
+  border: none;
+  width: 200px;
+  text-align: center;
+  font-size: 12px;
+  padding: 5px;
+  font-weight: bold;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.textField:focus {
+  outline: none;
+}
+
+#submit {
+  width: 520px;
+  height: 30px;
+  border-radius: 5px;
+  border: none;
+  color: rgb(255, 255, 255);
+  font-weight: bold;
+  background-color: rgb(52, 52, 52);
+}
+
+#submit:hover {
+  background-color: rgb(255, 255, 255);
+  color: rgb(52, 52, 52);
+}

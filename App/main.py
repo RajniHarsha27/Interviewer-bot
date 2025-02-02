@@ -14,6 +14,9 @@ import io
 from fastapi.middleware.cors import CORSMiddleware
 import uuid
 from get_df_response import run_sample
+from models import ChatSession
+from pydantic import BaseModel, EmailStr
+from db import check_email_exists
 
 env_path = "C:\Hubnex\Interviewer Assistant\.env"
 load_dotenv(dotenv_path=env_path)
@@ -30,18 +33,20 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def home(request: Request):
     return templates.TemplateResponse('home.html', {'request': request})
 
-@app.post('/validate-email')
-async def validate_email(request: Request):
-    form_data = await request.json() 
-    email = form_data.get('email')
-    print("Email : " ,email)
-    #if email is present in db then valid, valid format eg: @gmail.com 
-    if(True): #condition to check valididty
-        validity = "true"
-        # POST requests to webhooks with fetched questions, 
-        # POST request /interview route to initiate interview.
-        
-    return {"valid": validity}
+class EmailValidationRequest(BaseModel):
+    email: EmailStr  # Ensures valid email format
+
+@app.post("/validate-email")
+async def validate_email(request: EmailValidationRequest):
+    """Validates if the email exists in the database."""
+    exists = check_email_exists(request.email)
+    global email
+    if exists:
+        print("Email exists in the database.")
+        email = request.email
+
+        return {"valid": True}
+    return {"valid": False}
 
 @app.get('/interview')
 async def interview(request: Request):
@@ -112,6 +117,7 @@ def generate_df_answer(transcript) -> str:
     answer = run_sample(transcript, id_)
     print("id : ", id_)
     return answer
+
 
 @app.websocket("/ws/audio")
 async def websocket_audio(websocket: WebSocket):

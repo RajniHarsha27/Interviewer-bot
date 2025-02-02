@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interview Question Generator</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Interview Question Generator</h1>
+      <form id="questionForm">
+        <textarea
+          class="inputArea"
+          id="jd"
+          placeholder="Enter Job Description (JD)"
+          required
+        ></textarea>
+        <textarea
+          class="inputArea"
+          id="sampleQuestions"
+          placeholder="Enter Sample Questions (Optional)"
+        ></textarea>
+        <div id="cvInput">
+          CV
+          <input type="file" id="cv" accept=".txt,.pdf,.docx" required />
+        </div>
+        <div id="textInputs">
+          <input
+            id="name"
+            type="text"
+            class="textField"
+            placeholder="Candidate's name"
+          />
+          <input
+            type="email"
+            id="email"
+            class="textField"
+            placeholder="Candidate's email"
+          />
+        </div>
+        <button id="submit" type="submit">Generate Questions</button>
+      </form>
+    </div>
+    <script src="/static/js/script.js"></script>
+  </body>
+</html>

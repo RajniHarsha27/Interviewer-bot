@@ -3,6 +3,7 @@ let statusBar = document.getElementById("statusBar");
 const maxRecordingTime = 29000;
 let seconds = 29;
 let funcId = null;
+let stopTimeout = null;
 
 let mediaRecorder;
 let isRecording = false;
@@ -135,12 +136,12 @@ function setupSuccess(stream) {
       stopButton.addEventListener("click", handleStopRecordingManually);
 
       // Auto-stop recording after 29 seconds
-      setTimeout(() => {
+      stopTimeout = setTimeout(() => {
         if (mediaRecorder.state === "recording") {
           mediaRecorder.stop();
           stopButton.remove();
         }
-      }, maxRecordingTime);
+      }, 29000);
     }
   }
 
@@ -150,9 +151,15 @@ function setupSuccess(stream) {
       mediaRecorder.stop();
       stopTimer();
       recordButton.innerText = "Record";
-      recordButton.disabled = false; // Enable record button again
+      recordButton.disabled = false;
       statusBar.textContent = "Recording stopped manually.";
-      stopButton.remove(); // Remove stop button after stopping recording manually
+      stopButton.remove();
+
+      // Clear the auto-stop timeout when stopping manually
+      if (stopTimeout) {
+        console.log("cleared");
+        clearTimeout(stopTimeout);
+      }
     }
   }
 

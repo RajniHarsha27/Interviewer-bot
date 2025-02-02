@@ -15,25 +15,27 @@
         .getElementById("interview")
         .addEventListener("click", function () {
           const email = document.getElementById("email").value;
+          const formData = new FormData();
+          formData.append("email", email);
           console.log(email);
-          // Send a POST request to the server
-          fetch("http://127.0.0.1:8000/validate-email", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email: email }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              // Redirect to the interview page if the server allows it
-              if (data.valid == "true") {
-                console.log("valid");
-              }
+          try {
+            fetch("/validate-email", {
+              method: "POST",
+              body: formData,
             })
-            .catch((error) => {
-              console.error("Error:", error);
-            });
+              .then((response) => {
+                return response.json();
+              })
+              .then((data) => {
+                if (data.message != "Invalid") {
+                  window.location.href = "http://127.0.0.1:8000/interview";
+                } else {
+                  alert("invalid");
+                }
+              });
+          } catch (error) {
+            console.error("Error:", error);
+          }
         });
     </script>
   </body>

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, File, WebSocket, WebSocketDisconnect, UploadFile
+from fastapi import FastAPI, Request, File, WebSocket, WebSocketDisconnect, UploadFile, Form
 import json
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -16,7 +16,14 @@ import uuid
 from get_df_response import run_sample
 from models import ChatSession
 from pydantic import BaseModel, EmailStr
-from db import check_email_exists
+from db import candidate, interview
+import httpx
+
+session_variables ={
+    "user_email" : "",
+    "valid" : False
+}
+
 
 env_path = "C:\Hubnex\Interviewer Assistant\.env"
 load_dotenv(dotenv_path=env_path)
@@ -37,20 +44,28 @@ class EmailValidationRequest(BaseModel):
     email: EmailStr  # Ensures valid email format
 
 @app.post("/validate-email")
-async def validate_email(request: EmailValidationRequest):
+async def validate_email(request: Request, email: EmailStr = Form(...)):
     """Validates if the email exists in the database."""
-    exists = check_email_exists(request.email)
-    global email
-    if exists:
-        print("Email exists in the database.")
-        email = request.email
-
-        return {"valid": True}
-    return {"valid": False}
+    global session_variables
+    print("email : ", email)
+    existing_candidate = candidate.find_one({"email": email})
+    if existing_candidate:
+        session_variables["user_email"] = email
+        session_variables["valid"] = True
+        return JSONResponse(content ={"message": "valid"}, status_code=200)
+    else:
+        return JSONResponse(content={"message": "Invalid"}, status_code=400)
+    
 
 @app.get('/interview')
 async def interview(request: Request):
-    return templates.TemplateResponse('interview.html', {'request': request, "var" : "variable"})
+    print("email inside interview route : ", session_variables["user_email"])
+    if session_variables["valid"]:
+        session_variables["valid"] = False
+        session_variables["user_email"] = ""
+        return templates.TemplateResponse('interview.html', {'request': request, "var" : "variable"})
+    else:
+        return "access denied"
 
 
 client = speech.SpeechClient()

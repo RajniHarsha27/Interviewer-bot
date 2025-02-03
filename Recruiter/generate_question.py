@@ -16,8 +16,12 @@ def generate_questions(cv, jd, sample_questions) -> str :
 
     You are a highly experienced Recruitment Specialist and Interview Strategist with expertise in 
     creating tailored interview questions for a wide range of roles and industries. Your task is to 
-    generate a list of **10 customized interview questions** for a specific job candidate based on 
-    the provided **Job Description**, their **CV**, and a set of **Sample Questions** for reference.
+    generate a list of **10 customized interview questions** for a specific candidate based on 
+    the provided **Job Description**, and a set of **Sample Questions** for reference.
+
+    Identify the key things that you want to asses in the candidate that is required for the job.
+
+    You can use the CV of the candidate to tailor your questions.
 
     Key areas to focus on:
 

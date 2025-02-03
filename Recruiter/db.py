@@ -6,3 +6,4 @@ client = MongoClient(uri, server_api=ServerApi('1'))
 
 db = client.hubnex
 candidate = db["candidate_data"]
+interview = db["interview"]

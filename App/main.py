@@ -16,9 +16,10 @@ import uuid
 from get_df_response import run_sample
 from models import ChatSession
 from pydantic import BaseModel, EmailStr
-from db import candidate, interview
+from db import candidate, interview_model
 import httpx
 import requests
+from datetime import datetime
 
 session_variables ={
     "user_email" : "",
@@ -69,7 +70,6 @@ async def interview(request: Request):
     print("email inside interview route : ", session_variables["user_email"])
     if session_variables["valid"]:
         session_variables["valid"] = False
-        session_variables["user_email"] = ""
         return templates.TemplateResponse('interview.html', {'request': request, "var" : "variable"})
     else:
         return "access denied"
@@ -143,7 +143,7 @@ def generate_df_answer(transcript) -> str:
 
 @app.websocket("/ws/audio")
 async def websocket_audio(websocket: WebSocket):
-    global id_
+    global id_, session_variables
     await websocket.accept()
     
     #response = requests.post("http://127.0.0.1:8001/restart")
@@ -156,6 +156,8 @@ async def websocket_audio(websocket: WebSocket):
     answer_audio = generate_audio(initial_response)
     await websocket.send_json({"answer" : initial_response})
     await websocket.send_bytes(answer_audio)
+    first_user_response = True
+    bot_response =[]
     
     try:
         while True:
@@ -163,14 +165,33 @@ async def websocket_audio(websocket: WebSocket):
             audio_data = await websocket.receive_bytes()
             results = get_transcript(audio_data)
             transcript = " ".join([result.alternatives[0].transcript for result in results])
-             
+
+            if not first_user_response:
+                user_response = transcript
+
+            
             # Send the transcript back to the client
             await websocket.send_json({"transcript": transcript})
             
             answer = generate_df_answer(transcript) # fetches question from df webhook server
-            #
-            answer_audio = generate_audio(answer)
+            bot_response.append(answer)
+            
 
+            if not first_user_response:
+                document = {
+                    "session_id" : id_,
+                    "email" :session_variables["user_email"],
+                    "bot_response" : bot_response[-2],
+                    "user_response" : user_response,
+                    "delivered_time" : datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+                }
+
+                interview_model.insert_one(document)
+                print("Data stored")
+
+            first_user_response = False
+
+            answer_audio = generate_audio(answer)
             await websocket.send_bytes(answer_audio)
             await websocket.send_json({"answer" : answer})
 

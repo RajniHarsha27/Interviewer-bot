@@ -47,6 +47,11 @@ socket.onmessage = (event) => {
       statusBar.innerHTML = "<br>";
       putResponse(data.transcript);
     } else if (data.answer) {
+      console.log(data.answer);
+      if (data.answer.trim() == "Thank you for your time. Goodbye!") {
+        alert("Your answers are recorded. You can exit this webpage now.");
+        recordButton.remove();
+      }
       putAnswer(data.answer);
     }
   } else {
@@ -57,6 +62,7 @@ socket.onmessage = (event) => {
     audioPlayer.id = "audio-player";
     historyArea.appendChild(audioPlayer);
     audioPlayer.src = audioUrl;
+
     audioPlayer.play();
     statusBar.textContent = "Bot speaking...";
     audioPlayer.addEventListener("ended", () => {

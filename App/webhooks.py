@@ -2,7 +2,10 @@
 from fastapi import FastAPI, Request, File, WebSocket, WebSocketDisconnect, UploadFile
 import json
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from classifier import classify
+import os
+import sys
 
 questions = ['Your CV highlights experience with various LLMs and NLP tasks. Can you describe a project where you had to fine-tune a large language model for a specific application, detailing the challenges you faced and how you overcame them?',
  'The job description emphasizes experience with RAG (Retrieval-Augmented Generation).  Describe your experience building and deploying RAG systems. What were some key design decisions you made, and what were the performance implications of those choices?',
@@ -61,10 +64,26 @@ def format_response_v2(text, intent):
 @app.get("/")
 async def home(request:Request):
     return "ok"
+
+class QuestionRequest(BaseModel):
+    questions: list[str]
+
+@app.post("/send-questions/")
+async def receive_questions(data: QuestionRequest):
+
+    global questions
+    # Access the list of questions
+    questions = data.questions
+    print(f"Received questions: {questions}")
+    
+    # Optionally, you can process the questions here or return them as a response
+    return {"message": "Recieved sucessfully"}
+
+
 @app.post("/webhook")
 async def handle_webhook(request: Request):
 
-    global current_index, intent
+    global current_index, intent, questions
 
     body = await request.json()
     pretty_body = json.dumps(body, indent=4)
@@ -77,7 +96,8 @@ async def handle_webhook(request: Request):
     print("current_intent :", current_intent)
     print("user input : ", user_input)
 
-    if current_page == 'Intent Classifier' and current_intent!= "confirmation.intent":
+    #if current_page == 'Intent Classifier' and current_intent!= "confirmation.intent":
+    if current_page == 'Intent Classifier':
         text =""
         if(current_index > -1):
             intent = classify(user_input)

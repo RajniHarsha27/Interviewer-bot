@@ -18,6 +18,7 @@ from models import ChatSession
 from pydantic import BaseModel, EmailStr
 from db import candidate, interview
 import httpx
+import requests
 
 session_variables ={
     "user_email" : "",
@@ -52,6 +53,12 @@ async def validate_email(request: Request, email: EmailStr = Form(...)):
     if existing_candidate:
         session_variables["user_email"] = email
         session_variables["valid"] = True
+        questions = candidate.find_one({"email": email}, {"_id": 0, "questions": 1})
+        to_send = questions["questions"]
+        async with httpx.AsyncClient() as client:
+            response = await client.post("http://127.0.0.1:8001/send-questions/", json={"questions": to_send})
+        print(response.json())
+
         return JSONResponse(content ={"message": "valid"}, status_code=200)
     else:
         return JSONResponse(content={"message": "Invalid"}, status_code=400)
@@ -138,6 +145,10 @@ def generate_df_answer(transcript) -> str:
 async def websocket_audio(websocket: WebSocket):
     global id_
     await websocket.accept()
+    
+    #response = requests.post("http://127.0.0.1:8001/restart")
+    #print("webhooks restarted")
+
     if id_ is None:
         id_ = str(uuid.uuid4())
 
